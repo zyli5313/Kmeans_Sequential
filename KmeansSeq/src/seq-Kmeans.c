@@ -105,25 +105,36 @@ int kmeans_write(char *outputfilename, int numberofLocalData,
 	return 0;
 }
 
+
+//for computing the Euclidean distance (for 2D data point)
+float Compute_ED(float *datapoint1, float *datapoint2, int numberofCoordinates){
+	float distance = 0;
+	int i;
+	for(i = 0; i < numberofCoordinates; i++){
+		distance += (datapoint1[i] - datapoint2[i]) * (datapoint1[i] - datapoint2[i]);
+	}
+	return distance;
+}
+
+
+
 //for find the nearest neighbor in the given set;
 int find_NN(float *datapoint, float ** neighborset, int numberofNeighber,
 		int numberofCoordinates) {
-	int i, j;
+	int i;
 	int nearest_neighbor = -1;
 	float distance, mindist;
 	mindist = FLT_MAX;
-	for (i = 0; i < numberofNeighber; i++) {
-		distance = 0.0;
-		for (j = 0; j < numberofCoordinates; j++) {
-			distance += (datapoint[j] - neighborset[i][j])
-					* (datapoint[j] - neighborset[i][j]);
-			if (distance < mindist) {
-				nearest_neighbor = i;
-			}
+	for(i = 0; i < numberofNeighber; i++){
+		distance = Compute_ED(datapoint, neighborset[i], numberofCoordinates);
+		if(distance < mindist){
+			mindist = distance;
+			nearest_neighbor = i;
 		}
 	}
 	return nearest_neighbor;
 }
+
 
 int kmeans(float **data, int numberofClusters, int numberofCoordinates,
 		int numberofTotalData, float stopthreshold, int *membership,
@@ -146,10 +157,11 @@ int kmeans(float **data, int numberofClusters, int numberofCoordinates,
 	}
 
 	//reset memeber ship
-	membership[0] = -1;
-	for (i = 1; i < numberofTotalData; i++) {
-		updatedClusters[i] = updatedClusters[i - 1] + numberofCoordinates;
+	for (i = 0; i < numberofTotalData; i++){
 		membership[i] = -1;
+	}
+	for (i = 1; i < numberofClusters; i++) {
+		updatedClusters[i] = updatedClusters[i - 1] + numberofCoordinates;
 	}
 
 	//get the total data number
