@@ -14,13 +14,14 @@
 
 
 void printUsage(char *name) {
-	fprintf(stderr, "Usage: %s -i inFile -o outFile -k #OfClusters -t threshold -l #ofLinesInInputFile -d #dimension\n", name);
+	fprintf(stderr, "Usage: %s -p dataType -i inFile -o outFile -k #OfClusters -t threshold -l #ofLinesInInputFile -d #dimension\n", name);
 }
 
 int main(int argc, char **argv) {
 	extern char *optarg;
 	extern int optind, optopt;
 	int c, ncluster = 4, nline, totalLine, ndim, i = 0, j = 0;
+	int type;
 	char *inFile, *outFile;
 	float thres = 0.01;
 
@@ -31,13 +32,16 @@ int main(int argc, char **argv) {
 	clock_t stime, etime, 	// whole system time
 		stimeCluster, etimeCluster;	// maximum cluster time among all processes
 
-	if(argc != 13) {
+	if(argc != 15) {
 		printUsage(argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	while ((c = getopt(argc, argv, "i:o:k:t:l:d:")) != EOF) {
+	while ((c = getopt(argc, argv, "p:i:o:k:t:l:d:")) != EOF) {
 		switch (c) {
+		case 'p':
+			type = atoi(optarg);
+			break;
 		case 'i':
 			inFile = optarg;
 			break;
@@ -62,7 +66,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	stime = clock();
+	stime = time(NULL);
 
 	printf("init done\n");
 
@@ -83,13 +87,13 @@ int main(int argc, char **argv) {
 	printf("init cluster center done\n");
 
 	// do kmeans calculation
-	stimeCluster = clock();
+	stimeCluster = time(NULL);
 	label = (int *) malloc(nline * sizeof(int));
 
 	//printf("rank:%d prior kmeans\n", rank);
-	kmeans(NORMDATA, data, ncluster, ndim, nline, thres, label, centroid);
+	kmeans(type, data, ncluster, ndim, nline, thres, label, centroid);
 	printf("kmeans done\n");
-	etimeCluster = clock();
+	etimeCluster = time(NULL);
 
 	// write cluster centroids to disk
 	// TODO 2 write to same outFile ?
@@ -98,10 +102,10 @@ int main(int argc, char **argv) {
 	free(label);
 	free(centroid[0]);
 	free(centroid);
-	etime = clock();
+	etime = time(NULL);
 
 	// performance report
-	printf("System time: %f\tClustering time: %f\n", (double)(etime-stime) / (CLOCKS_PER_SEC * 1000), (double)(etimeCluster-stimeCluster) / (CLOCKS_PER_SEC * 1000));
+	printf("System time: %f secs\tClustering time: %f secs\n", (double)(etime-stime), (double)(etimeCluster-stimeCluster));
 
 	return EXIT_SUCCESS;
 }
