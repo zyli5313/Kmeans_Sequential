@@ -147,7 +147,7 @@ int kmeans(float **data, int numberofClusters, int numberofCoordinates,
 	//malloc space for pointers
 	updatedClusterSize = (int *) calloc(numberofClusters, sizeof(int));
 
-	updatedClusters = (float **) malloc(numberofClusters * sizeof(float*));
+	updatedClusters = (float **) calloc(numberofClusters, sizeof(float*));
 	updatedClusters[0] = (float *) calloc(
 			numberofClusters * numberofCoordinates, sizeof(float));
 
@@ -173,6 +173,7 @@ int kmeans(float **data, int numberofClusters, int numberofCoordinates,
 	iterations = 0;
 	while (delta > stopthreshold && iterations < MY_MAXITER) {
 		iterations++;
+		differences = 0;
 //		may use the Wtime to record computing time
 //		double time = MPI_Wtime();
 
