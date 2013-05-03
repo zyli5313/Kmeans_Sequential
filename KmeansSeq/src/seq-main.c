@@ -20,7 +20,7 @@ void printUsage(char *name) {
 int main(int argc, char **argv) {
 	extern char *optarg;
 	extern int optind, optopt;
-	int c, ncluster = 4, nline, totalLine, ndim, i = 0;
+	int c, ncluster = 4, nline, totalLine, ndim, i = 0, j = 0;
 	char *inFile, *outFile;
 	float thres = 0.01;
 
@@ -77,7 +77,12 @@ int main(int argc, char **argv) {
 	for(i = 1; i < ncluster; i++)
 		centroid[i] = centroid[i-1] + ndim;
 
-	memcpy(centroid, data, ncluster * ndim * sizeof(float));
+	for(i = 0; i < ncluster; i ++){
+		for(j = 0; j < ndim; j ++){
+			centroid[i][j] = data[i][j];
+		}
+	}
+//	memcpy(centroid, data, ncluster * ndim * sizeof(float));
 	printf("init cluster center done\n");
 
 	// do kmeans calculation
@@ -85,7 +90,7 @@ int main(int argc, char **argv) {
 	label = (int *) malloc(nline * sizeof(int));
 
 	//printf("rank:%d prior kmeans\n", rank);
-	kmeans(data, ncluster, ndim, nline, thres, label, centroid);
+	kmeans(NORMDATA, data, ncluster, ndim, nline, thres, label, centroid);
 	printf("kmeans done\n");
 	etimeCluster = clock();
 
