@@ -20,7 +20,7 @@ void printUsage(char *name) {
 int main(int argc, char **argv) {
 	extern char *optarg;
 	extern int optind, optopt;
-	int c, ncluster = 4, nline, totalLine, ndim, i = 0;
+	int c, ncluster = 4, nline, totalLine, ndim, i = 0, j = 0;
 	char *inFile, *outFile;
 	float thres = 0.01;
 
@@ -77,7 +77,9 @@ int main(int argc, char **argv) {
 	for(i = 1; i < ncluster; i++)
 		centroid[i] = centroid[i-1] + ndim;
 
-	memcpy(centroid, data, ncluster * ndim * sizeof(float));
+	for(i = 0; i < ncluster; i++)
+		for(j = 0; j < ndim; j++)
+			centroid[i][j] = data[i][j];
 	printf("init cluster center done\n");
 
 	// do kmeans calculation
