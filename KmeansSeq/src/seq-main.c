@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 	label = (int *) malloc(nline * sizeof(int));
 
 	//printf("rank:%d prior kmeans\n", rank);
-	kmeans(data, ncluster, ndim, nline, thres, label, centroid);
+	kmeans(NORMDATA, data, ncluster, ndim, nline, thres, label, centroid);
 	printf("kmeans done\n");
 	etimeCluster = clock();
 

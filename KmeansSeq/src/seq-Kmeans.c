@@ -116,17 +116,27 @@ float Compute_ED(float *datapoint1, float *datapoint2, int numberofCoordinates){
 	return distance;
 }
 
-
+float Compute_DNADist(float *datapoint1, float *datapoint2, int numberofCoordinates){
+	float distance = 0;
+	int i;
+	for(i = 0; i < numberofCoordinates; i++){
+		distance += (datapoint1[i] == datapoint2[i]) ? 0 : 1;
+	}
+	return distance;
+}
 
 //for find the nearest neighbor in the given set;
-int find_NN(float *datapoint, float ** neighborset, int numberofNeighber,
+int find_NN(int type, float *datapoint, float ** neighborset, int numberofNeighber,
 		int numberofCoordinates) {
 	int i;
 	int nearest_neighbor = -1;
 	float distance, mindist;
 	mindist = FLT_MAX;
 	for(i = 0; i < numberofNeighber; i++){
-		distance = Compute_ED(datapoint, neighborset[i], numberofCoordinates);
+		if(type == NORMDATA)
+			distance = Compute_ED(datapoint, neighborset[i], numberofCoordinates);
+		else if(type == DNADATA)
+			distance = Compute_DNADist(datapoint, neighborset[i], numberofCoordinates);
 		if(distance < mindist){
 			mindist = distance;
 			nearest_neighbor = i;
@@ -136,7 +146,7 @@ int find_NN(float *datapoint, float ** neighborset, int numberofNeighber,
 }
 
 
-int kmeans(float **data, int numberofClusters, int numberofCoordinates,
+int kmeans(int type, float **data, int numberofClusters, int numberofCoordinates,
 		int numberofTotalData, float stopthreshold, int *membership,
 		float **clusters) {
 	float **updatedClusters;
@@ -179,7 +189,7 @@ int kmeans(float **data, int numberofClusters, int numberofCoordinates,
 
 		delta = 0.0;
 		for (i = 0; i < numberofTotalData; i++) {
-			index = find_NN(data[i], clusters, numberofClusters,
+			index = find_NN(type, data[i], clusters, numberofClusters,
 					numberofCoordinates);
 			if (index < 0) {
 				printf("Error: mistake in finding nearest cluster.");
@@ -198,9 +208,9 @@ int kmeans(float **data, int numberofClusters, int numberofCoordinates,
 		for (i = 0; i < numberofClusters; i++) {
 			for (j = 0; j < numberofCoordinates; j++) {
 				if (updatedClusterSize[i] > 0) {
-					clusters[i][j] /= updatedClusterSize[i];
+					clusters[i][j] = updatedClusters[i][j] / updatedClusterSize[i];
 				}
-				updatedClusters[i][j] = 0;
+				updatedClusters[i][j] = 0.0;
 			}
 			updatedClusterSize[i] = 0;
 		}

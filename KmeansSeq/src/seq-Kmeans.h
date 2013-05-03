@@ -6,11 +6,13 @@
  */
 
 #ifndef SEQ_KMEANS_H_
+#define NORMDATA 0
+#define DNADATA 1
 #define SEQ_KMEANS_H_
 
 
 float** kmeans_read(char*, int, int);
-int     kmeans(float**, int, int, int, float, int*, float**);
+int     kmeans(int, float**, int, int, int, float, int*, float**);
 int     kmeans_write(char*, int, int, int, int, float**, int*, int);
 
 
