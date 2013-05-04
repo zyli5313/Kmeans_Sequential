@@ -22,8 +22,6 @@ float** kmeans_read(char *fname, int nline, int ndim) {
 	char *token;
 	int i = 1, num = 0;
 
-	//printf("nline:%d\tndim:%d\n", *nline, ndim);
-
 	FILE * fp;
 	char * line = NULL;
 	size_t len = 0;
@@ -47,13 +45,9 @@ float** kmeans_read(char *fname, int nline, int ndim) {
 		token = strtok(line, " ,");
 		while (token != NULL ) {
 			data[num][j++] = atof(token);
-//				printf("%s\t", token);
 			token = strtok(NULL, " ,");
 		}
 		num++;
-//			printf("%d\n", num);
-//			printf("Retrieved line of length %zu :\n", read);
-//			printf("%s", line);
 	}
 
 	return data;
@@ -69,11 +63,6 @@ int kmeans_write(char *outputfilename, int numberofLocalData,
 			"Start writing results (cluster centroid and membership) of K=%d cluster centers to file \"%s\"\n",
 			numberofClusters, outputfilename);
 
-//	struct stat st = {0};
-//
-//	if (stat("/some/directory", &st) == -1) {
-//		mkdir("/some/directory", 0777);
-//	}
 
 	fp = fopen(outputfilename, "w");
 	if (fp == NULL ) {
@@ -84,12 +73,10 @@ int kmeans_write(char *outputfilename, int numberofLocalData,
 		for (i = 0; i < numberofClusters; i++) {
 			char str[32];
 			fprintf(fp, "%d ", i);
-			//				MPI_File_write(mpif, str, strlen(str), MPI_CHAR, &mpistatus);
 			for (j = 0; j < numberofCoordinates; j++) {
 				fprintf(fp, "%f ", clusters[i][j]);
 
 			}
-			//				MPI_File_write(mpif, "\n", 1, MPI_CHAR, &mpistatus);
 			fprintf(fp, "\n");
 		}
 	}
@@ -116,6 +103,7 @@ float Compute_ED(float *datapoint1, float *datapoint2, int numberofCoordinates){
 	return distance;
 }
 
+//for computing the DNA distance (for DNA data point)
 float Compute_DNADist(float *datapoint1, float *datapoint2, int numberofCoordinates){
 	float distance = 0;
 	int i;
@@ -196,8 +184,6 @@ int kmeans(int type, float **data, int numberofClusters, int numberofCoordinates
 	while (delta > stopthreshold && iterations < MY_MAXITER) {
 		iterations++;
 		differences = 0;
-//		may use the Wtime to record computing time
-//		double time = MPI_Wtime();
 
 		delta = 0.0;
 		for (i = 0; i < numberofTotalData; i++) {
@@ -218,7 +204,6 @@ int kmeans(int type, float **data, int numberofClusters, int numberofCoordinates
 			}
 			else if(type == DNADATA){
 				for(j = 0; j < numberofCoordinates; j++){
-//					printf("Proc %d: test-> %d\n", rank, (int)data[i][j] - 1);
 					ClusterDNAcounts[index][j][(int)data[i][j] - 1]++;
 				}
 			}

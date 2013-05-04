@@ -95,8 +95,6 @@ int main(int argc, char **argv) {
 	printf("kmeans done\n");
 	etimeCluster = time(NULL);
 
-	// write cluster centroids to disk
-	// TODO 2 write to same outFile ?
 	kmeans_write(outFile, nline, totalLine, ncluster, ndim , centroid, label, 0);
 
 	free(label);
