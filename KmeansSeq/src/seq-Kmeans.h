@@ -8,6 +8,7 @@
 #ifndef SEQ_KMEANS_H_
 #define NORMDATA 0
 #define DNADATA 1
+#define DNATYPENUM 4
 #define SEQ_KMEANS_H_
 
 

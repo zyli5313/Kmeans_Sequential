@@ -151,8 +151,9 @@ int kmeans(int type, float **data, int numberofClusters, int numberofCoordinates
 		float **clusters) {
 	float **updatedClusters;
 	int *updatedClusterSize;
+	int *** ClusterDNAcounts;
 
-	int i, j;
+	int i, j, k;
 	//initialization
 	//malloc space for pointers
 	updatedClusterSize = (int *) calloc(numberofClusters, sizeof(int));
@@ -165,6 +166,17 @@ int kmeans(int type, float **data, int numberofClusters, int numberofCoordinates
 		printf("Error: Cannot calloc space for the new cluster variables");
 		exit(1);
 	}
+
+	//initiate the DNA counters
+		ClusterDNAcounts = (int ***) malloc(numberofClusters * sizeof(int**));
+		for(i = 0; i < numberofClusters; i++){
+			ClusterDNAcounts[i] = (int **) malloc(numberofCoordinates *
+					sizeof(int *));
+			ClusterDNAcounts[i][0] = (int *) calloc(DNATYPENUM * numberofCoordinates,
+							sizeof(int));
+			for(j = 1; j < numberofCoordinates; j ++)
+				ClusterDNAcounts[i][j] = ClusterDNAcounts[i][j - 1] + DNATYPENUM;
+		}
 
 	//reset memeber ship
 	for (i = 0; i < numberofTotalData; i++){
@@ -199,20 +211,55 @@ int kmeans(int type, float **data, int numberofClusters, int numberofCoordinates
 				differences++;
 			membership[i] = index;
 			updatedClusterSize[index]++;
-			for (j = 0; j < numberofCoordinates; j++) {
-				updatedClusters[index][j] += data[i][j];
+			if(type == NORMDATA){
+				for (j = 0; j < numberofCoordinates; j++) {
+					updatedClusters[index][j] += data[i][j];
+				}
+			}
+			else if(type == DNADATA){
+				for(j = 0; j < numberofCoordinates; j++){
+//					printf("Proc %d: test-> %d\n", rank, (int)data[i][j] - 1);
+					ClusterDNAcounts[index][j][(int)data[i][j] - 1]++;
+				}
+			}
+			else{
+				printf("Error: data type undefined.");
+				exit(1);
 			}
 		}
 
 		//compute the new cluster center
-		for (i = 0; i < numberofClusters; i++) {
-			for (j = 0; j < numberofCoordinates; j++) {
-				if (updatedClusterSize[i] > 0) {
-					clusters[i][j] = updatedClusters[i][j] / updatedClusterSize[i];
+		if(type == NORMDATA){
+			for (i = 0; i < numberofClusters; i++) {
+				for (j = 0; j < numberofCoordinates; j++) {
+					if (updatedClusterSize[i] > 0) {
+						clusters[i][j] = updatedClusters[i][j] / updatedClusterSize[i];
+					}
+					updatedClusters[i][j] = 0.0;
 				}
-				updatedClusters[i][j] = 0.0;
+				updatedClusterSize[i] = 0;
 			}
-			updatedClusterSize[i] = 0;
+		}
+		else if(type == DNADATA){
+			for(i = 0; i < numberofClusters; i++){
+				for(j = 0; j < numberofCoordinates; j++){
+					int mostappearDNA = -1;
+					int maxcount = 0;
+					for(k = 0; k < DNATYPENUM; k ++){
+						if(ClusterDNAcounts[i][j][k] > maxcount){
+							mostappearDNA = k;
+							maxcount = ClusterDNAcounts[i][j][k];
+						}
+						ClusterDNAcounts[i][j][k] = 0;
+					}
+					//DNA is define from 1 to DNATYPENUM
+					clusters[i][j] = mostappearDNA + 1;
+				}
+			}
+		}
+		else{
+			printf("Error: data type undefined.");
+			exit(1);
 		}
 		delta = differences / (double) numberofTotalData;
 	}
@@ -220,5 +267,10 @@ int kmeans(int type, float **data, int numberofClusters, int numberofCoordinates
 	free(updatedClusters);
 	free(updatedClusters[0]);
 	free(updatedClusterSize);
+	for(i = 0; i < numberofClusters; i++){
+		free(ClusterDNAcounts[i][0]);
+	}
+	free(ClusterDNAcounts);
+
 	return 1;
 }
